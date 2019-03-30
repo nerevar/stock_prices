@@ -1,4 +1,5 @@
 import os
+import csv
 import importlib
 import pandas as pd
 from datetime import datetime
@@ -47,6 +48,16 @@ def calc_value(df, builder):
     return merge_values(date, value)
 
 
+def save_values(name, values):
+    filepath = './graph_data/{}/values.csv'.format(name)
+    outfile = open(filepath, 'a' if os.path.exists(filepath) else 'w')
+    writer = csv.writer(outfile)
+
+    for row in values:
+        writer.writerow(row)
+    outfile.close()
+
+
 def main():
     graph_builders = load_graph_builders()
 
@@ -67,6 +78,8 @@ def main():
                 result = calc_value(data, builder['builder'])
                 results[builder['name']].append(result)
 
+    for name, values in results.items():
+        save_values(name, values)
     print(results)
 
 if __name__ == "__main__":
