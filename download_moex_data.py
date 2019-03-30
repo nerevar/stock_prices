@@ -82,8 +82,23 @@ def parse_pagination(root):
         }
 
 
-def validate_quote(quote):
-    return 'CLOSE' in quote
+def validate_float_val(quote, key):
+    return quote.get(key) and quote.get(key) > 0
+
+
+def validate_quote(quote, engine, market):
+    if engine == 'currency' and market == 'selt':
+        return validate_float_val(quote, 'VOLRUR') \
+               or validate_float_val(quote, 'NUMTRADES') \
+               or validate_float_val(quote, 'CLOSE')
+    elif engine == 'stock' and market in ['bonds', 'shares']:
+        return validate_float_val(quote, 'VOLUME') \
+               or validate_float_val(quote, 'NUMTRADES') \
+               or validate_float_val(quote, 'CLOSE')
+    elif engine == 'stock' and market == 'index':
+        return validate_float_val(quote, 'CLOSE')
+
+    assert False, 'Unknown quote type'
 
 
 def parse_quotes(root, quote_attrs):
@@ -113,13 +128,14 @@ def get_moex_data(engine, market, date, start=0, save_raw_xml=False):
     xml_data = download_moex_data(engine, market, date, start, save_raw_xml)
     pagination, quote_attrs, quotes = parse_moex_data(xml_data)
 
-    valid_quotes = [q for q in quotes if validate_quote(q)]
+    valid_quotes = [q for q in quotes if validate_quote(q, engine, market)]
 
     if len(valid_quotes):
         save_to_csv(valid_quotes, engine, market, date, quote_attrs if start == 0 else None)
     else:
-        logging.error('No quotes for "{}, {}, {}, {}", pagination: {}'.format(
-            engine, market, date, start, pagination))
+        if len(quotes) == 0:
+            logging.error('No quotes for "{}, {}, {}, {}", pagination: {}'.format(
+                engine, market, date, start, pagination))
 
     logging.debug('Got quotes: {:3d}/{:3d}, pagination: {}, params: {}, {}, {}, {}'.format(
         len(valid_quotes), len(quotes),
@@ -145,12 +161,14 @@ def parse_args():
     parser.add_argument(
         '--engine',
         default='stock',
+        choices=['stock', 'currency'],
         help='Доступные торговые системы: stock, currency https://iss.moex.com/iss/engines.xml',
     )
     parser.add_argument(
         '--market',
         required=True,
-        help='Доступные рынки: index, shares, bonds https://iss.moex.com/iss/engines/stock/markets.xml',
+        choices=['shares', 'bonds', 'index', 'selt'],
+        help='Доступные рынки: index, shares, bonds, selt https://iss.moex.com/iss/engines/stock/markets.xml',
     )
     parser.add_argument(
         '--date',
