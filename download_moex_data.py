@@ -6,6 +6,7 @@ import csv
 import logging
 import requests
 import argparse
+from collections import OrderedDict
 from datetime import datetime, timedelta
 from xml.etree import ElementTree
 
@@ -65,7 +66,7 @@ def parse_row_attributes(root):
         'int64': int,
     }
 
-    result = {}
+    result = OrderedDict()
     for row in root.findall("data[@id='history']/metadata/columns/column"):
         result[row.get('name')] = TYPES_MAP.get(row.get('type'), str)
 
@@ -90,7 +91,7 @@ def parse_quotes(root, quote_attrs):
 
     quotes = []
     for row in root.findall("data[@id='history']/rows/row"):
-        quote = {}
+        quote = OrderedDict()
         for attr_name, attr_type in quote_attrs.items():
             value = row.get(attr_name)
             quote[attr_name] = attr_type(value) if value else DEFAULT_QUOTE_ATTR_VALUE
