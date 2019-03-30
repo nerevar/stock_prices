@@ -7,12 +7,13 @@ import logging
 import requests
 import argparse
 from collections import OrderedDict
-from datetime import datetime, timedelta
+from datetime import datetime
 from xml.etree import ElementTree
+
+from helpers import daterange, DATE_FORMAT
 
 MOEX_QUOTES_URL = 'https://iss.moex.com/iss/history/engines/{engine}/markets/{market}/securities.xml' \
                   '?limit=100&date={date}&start={start}'
-DATE_FORMAT = '%Y-%m-%d'
 
 
 def download_moex_data(engine, market, date, start=0, save_raw_xml=False):
@@ -20,7 +21,8 @@ def download_moex_data(engine, market, date, start=0, save_raw_xml=False):
         engine=engine,
         market=market,
         date=date,
-        start=start)
+        start=start
+    )
 
     logging.debug('Request: {}'.format(url))
 
@@ -40,7 +42,8 @@ def save_to_csv(quotes, engine, market, date, header_attrs=None):
         month=date_parsed.strftime('%m'),
         day=date_parsed.strftime('%d'),
         engine=engine,
-        market=market)
+        market=market
+    )
 
     os.makedirs(os.path.dirname(filepath), exist_ok=True)
 
@@ -189,24 +192,19 @@ def parse_args():
     return parser.parse_args()
 
 
-def daterange(start_date, end_date):
-    for n in range(int((end_date - start_date).days) + 1):
-        yield start_date + timedelta(n)
-
-
 def main(args):
-    if args.dateend is None:
-        day_str = args.date.strftime(DATE_FORMAT)
+    if args.dateend:
+        dates = daterange(args.date, args.dateend)
+    else:
+        dates = [args.date]
+
+    for day in dates:
+        if day.weekday() >= 5:
+            # ignore weekends
+            continue
+        day_str = day.strftime(DATE_FORMAT)
         logging.info((args.engine, args.market, day_str))
         get_moex_data(args.engine, args.market, day_str, save_raw_xml=args.save_raw_xml)
-    else:
-        for day in daterange(args.date, args.dateend):
-            if day.weekday() >= 5:
-                # ignore weekends
-                continue
-            day_str = day.strftime(DATE_FORMAT)
-            logging.info((args.engine, args.market, day_str))
-            get_moex_data(args.engine, args.market, day_str, save_raw_xml=args.save_raw_xml)
 
 
 if __name__ == "__main__":

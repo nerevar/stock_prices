@@ -1,9 +1,12 @@
 import os
 import csv
+import argparse
 import importlib
 import pandas as pd
 from datetime import datetime
 from collections import defaultdict
+
+from helpers import daterange, DATE_FORMAT
 
 
 def load_graph_builder(name):
@@ -11,9 +14,12 @@ def load_graph_builder(name):
     return module.GraphBuilder()
 
 
-def load_graph_builders():
+def load_graph_builders(graphs_list):
+    if graphs_list is None:
+        graphs_list = next(os.walk('./graph_data'))[1]
+
     graphs = {}
-    for folder in next(os.walk('./graph_data'))[1]:
+    for folder in graphs_list:
         if '__' in folder:
             continue
         graphs[folder] = load_graph_builder(folder)
@@ -30,7 +36,10 @@ def load_data(engine, market, day):
         engine=engine,
         market=market
     )
-    return pd.read_csv(filepath)
+    if os.path.exists(filepath):
+        return pd.read_csv(filepath)
+    else:
+        return None
 
 
 def filter_data(df, filters):
@@ -43,14 +52,17 @@ def merge_values(date, value):
 
 def calc_value(df, builder):
     df_filtered = filter_data(df, builder.quote_filter())
-    date = builder.get_date(df_filtered)
-    value = builder.get_value(df_filtered)
-    return merge_values(date, value)
+    if df_filtered.shape[0] >= 1:
+        date = builder.get_date(df_filtered)
+        value = builder.get_value(df_filtered)
+        return merge_values(date, value)
+    else:
+        return None
 
 
-def save_values(name, values):
+def save_values(name, values, clear=False):
     filepath = './graph_data/{}/values.csv'.format(name)
-    outfile = open(filepath, 'a' if os.path.exists(filepath) else 'w')
+    outfile = open(filepath, 'a' if os.path.exists(filepath) and not clear else 'w')
     writer = csv.writer(outfile)
 
     for row in values:
@@ -58,8 +70,37 @@ def save_values(name, values):
     outfile.close()
 
 
-def main():
-    graph_builders = load_graph_builders()
+def parse_args():
+    parser = argparse.ArgumentParser(description='MOEX quotes graph builder')
+    parser.add_argument(
+        '--date',
+        required=True,
+        type=lambda d: datetime.strptime(d, DATE_FORMAT),
+        help='Дата, за которую строить графики в формате YYYY-MM-DD',
+    )
+    parser.add_argument(
+        '-g',
+        '--graphs',
+        '--graph',
+        nargs='*',
+        help='Названия графиков, которые пересчитать (английские названия папок). По-умолчанию — все.',
+    )
+    parser.add_argument(
+        '-c',
+        '--clear',
+        action='store_true',
+        help='Очищать ли предыдущие данные',
+    )
+    parser.add_argument(
+        '--dateend',
+        type=lambda d: datetime.strptime(d, DATE_FORMAT),
+        help='Дата окончания диапазона дат [date, dateend] в формате YYYY-MM-DD',
+    )
+    return parser.parse_args()
+
+
+def main(args):
+    graph_builders = load_graph_builders(args.graphs)
 
     results = {}
     graph_builders_by_market = defaultdict(list)
@@ -71,16 +112,27 @@ def main():
             'builder': builder
         })
 
-    for day in [datetime(2019, 3, 5), datetime(2019, 3, 6)]:
+    if args.dateend:
+        dates = daterange(args.date, args.dateend)
+    else:
+        dates = [args.date]
+
+    for day in dates:
         for (engine, market), builders in graph_builders_by_market.items():
             data = load_data(engine, market, day)
+            if data is None:
+                continue
             for builder in builders:
                 result = calc_value(data, builder['builder'])
-                results[builder['name']].append(result)
+                if result is not None:
+                    results[builder['name']].append(result)
 
     for name, values in results.items():
-        save_values(name, values)
+        save_values(name, values, args.clear)
+
     print(results)
 
+
 if __name__ == "__main__":
-    main()
+    args = parse_args()
+    main(args)
