@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import logging
+
 from lib.helpers import daterange, DATE_FORMAT
 from lib.nasdaq_downloader import get_nasdaq_data
 from lib.moex_downloader import get_moex_data
@@ -21,4 +23,5 @@ def downloader(args):
             # без выходных
             continue
         day_str = day.strftime(DATE_FORMAT)
+        logging.info((args.engine, args.market, day_str))
         get_moex_data(args.engine, args.market, day_str, save_raw_xml=args.save_raw_xml)

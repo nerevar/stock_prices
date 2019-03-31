@@ -130,8 +130,6 @@ def parse_moex_data(xml_data):
 
 
 def get_moex_data(engine, market, date_str, start=0, save_raw_xml=False):
-    logging.info((engine, market, date_str))
-
     xml_data = download_moex_data(engine, market, date_str, start, save_raw_xml)
     pagination, quote_attrs, quotes = parse_moex_data(xml_data)
 
