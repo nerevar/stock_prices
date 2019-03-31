@@ -1,6 +1,7 @@
 # moex_quotes
 Кравлер котировок акций/облигаций/валюты с Московской биржи
-https://nerevar.github.io/moex_quotes/index.html
+
+https://nerevar.github.io/moex_quotes/
 ---
 
 ### Разработка:
