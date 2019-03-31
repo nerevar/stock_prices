@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from datetime import timedelta
 
 DATE_FORMAT = '%Y-%m-%d'

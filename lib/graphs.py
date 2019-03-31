@@ -1,12 +1,12 @@
+# -*- coding: utf-8 -*-
+
 import os
 import csv
-import argparse
 import importlib
 import pandas as pd
-from datetime import datetime
 from collections import defaultdict
 
-from helpers import daterange, DATE_FORMAT
+from lib.helpers import daterange
 
 
 def load_graph_builder(name):
@@ -34,7 +34,6 @@ def load_graph_builders(graphs_list):
 
 
 def load_data(engine, market, day):
-    # day = datetime.strptime(date, DATE_FORMAT)
     filepath = './quotes/{year}/{month}/{day}/{year}-{month}-{day}-{engine}-{market}.csv'.format(
         year=day.strftime('%Y'),
         month=day.strftime('%m'),
@@ -80,36 +79,7 @@ def save_values(name, values, clear=False):
     outfile.close()
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(description='MOEX quotes graph builder')
-    parser.add_argument(
-        '--date',
-        required=True,
-        type=lambda d: datetime.strptime(d, DATE_FORMAT),
-        help='Дата, за которую строить графики в формате YYYY-MM-DD',
-    )
-    parser.add_argument(
-        '-g',
-        '--graphs',
-        '--graph',
-        nargs='*',
-        help='Названия графиков, которые пересчитать (английские названия папок). По-умолчанию — все.',
-    )
-    parser.add_argument(
-        '-c',
-        '--clear',
-        action='store_true',
-        help='Очищать ли предыдущие данные',
-    )
-    parser.add_argument(
-        '--dateend',
-        type=lambda d: datetime.strptime(d, DATE_FORMAT),
-        help='Дата окончания диапазона дат [date, dateend] в формате YYYY-MM-DD',
-    )
-    return parser.parse_args()
-
-
-def main(args):
+def graphs_builder(args):
     graph_builders = load_graph_builders(args.graphs)
 
     if args.dateend:
@@ -132,8 +102,3 @@ def main(args):
         save_values(name, values, args.clear)
 
     print(results)
-
-
-if __name__ == "__main__":
-    args = parse_args()
-    main(args)

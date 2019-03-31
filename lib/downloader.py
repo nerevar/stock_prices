@@ -1,16 +1,14 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 import os
 import csv
 import logging
 import requests
-import argparse
 from collections import OrderedDict
 from datetime import datetime
 from xml.etree import ElementTree
 
-from helpers import daterange, DATE_FORMAT
+from lib.helpers import daterange, DATE_FORMAT
 
 MOEX_QUOTES_URL = 'https://iss.moex.com/iss/history/engines/{engine}/markets/{market}/securities.xml' \
                   '?limit=100&date={date}&start={start}'
@@ -159,40 +157,9 @@ def configure_logging():
     logging.getLogger('urllib3').setLevel(logging.WARNING)
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(description='MOEX quotes downloader')
-    parser.add_argument(
-        '--engine',
-        default='stock',
-        choices=['stock', 'currency'],
-        help='Доступные торговые системы: stock, currency https://iss.moex.com/iss/engines.xml',
-    )
-    parser.add_argument(
-        '--market',
-        required=True,
-        choices=['shares', 'bonds', 'index', 'selt'],
-        help='Доступные рынки: index, shares, bonds, selt https://iss.moex.com/iss/engines/stock/markets.xml',
-    )
-    parser.add_argument(
-        '--date',
-        required=True,
-        type=lambda d: datetime.strptime(d, DATE_FORMAT),
-        help='Дата, за которую скачивать котировки в формате YYYY-MM-DD',
-    )
-    parser.add_argument(
-        '--dateend',
-        type=lambda d: datetime.strptime(d, DATE_FORMAT),
-        help='Дата окончания диапазона дат [date, dateend] в формате YYYY-MM-DD',
-    )
-    parser.add_argument(
-        '--save-raw-xml',
-        action='store_true',
-        help='Сохранять ли исходные XML файлы',
-    )
-    return parser.parse_args()
+def downloader(args):
+    configure_logging()
 
-
-def main(args):
     if args.dateend:
         dates = daterange(args.date, args.dateend)
     else:
@@ -205,9 +172,3 @@ def main(args):
         day_str = day.strftime(DATE_FORMAT)
         logging.info((args.engine, args.market, day_str))
         get_moex_data(args.engine, args.market, day_str, save_raw_xml=args.save_raw_xml)
-
-
-if __name__ == "__main__":
-    args = parse_args()
-    configure_logging()
-    main(args)
