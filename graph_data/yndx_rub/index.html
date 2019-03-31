@@ -1,0 +1,62 @@
+<!DOCTYPE HTML>
+<html lang="ru">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>YNDX NASDAQ IN RUB</title>
+    <link rel="stylesheet" type="text/css" href="../../static/css/main.css">
+</head>
+<body>
+
+<div id="container" class="chart"></div>
+
+<script src="../../static/js/jquery-3.1.1.min.js"></script>
+<script src="../../static/js/lodash-4.17.11.min.js"></script>
+<script src="../../static/js/main.js"></script>
+<script src="../../static/js/highstock.js"></script>
+<script type="text/javascript">
+    $
+        .when(loadData('values.csv'), loadData('../usdrub/values.csv'), loadData('../yndx_moex/values.csv'))
+        .then(function(result_yndx, result_usd, result_yndx_moex) {
+            var data_yndx = parse_csv(result_yndx[0]);
+            var data_usd = parse_csv(result_usd[0]);
+            var daya_yndx_moex = parse_csv(result_yndx_moex[0]);
+
+            var data_multiplied = mergeData(data_yndx, data_usd, function(point_yndx, point_usd) {
+                return point_yndx[1] * point_usd[1];
+            });
+
+            plotGraph({
+                series: [
+                    {
+                        type: 'line',
+                        name: 'YNDX NASDAQ',
+                        data: data_yndx,
+                        visible: false
+                    },
+                    {
+                        type: 'line',
+                        name: 'USD',
+                        data: data_usd,
+                        visible: false
+                    },
+                    {
+                        type: 'line',
+                        name: 'YNDX IN RUB',
+                        color: '#ffb252',
+                        data: data_multiplied
+                    },
+                    {
+                        type: 'line',
+                        name: 'YNDX MOEX',
+                        data: daya_yndx_moex
+                    }
+                ],
+                legend: {
+                    enabled: true
+                }
+            });
+        });
+</script>
+</body>
+</html>

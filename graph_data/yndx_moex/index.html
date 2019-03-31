@@ -14,32 +14,14 @@
 <script src="../../static/js/main.js"></script>
 <script src="../../static/js/highstock.js"></script>
 <script type="text/javascript">
-    $.ajax({
-        type: 'GET',
-        url: 'values.csv',
-        success: function (result) {
-            Highcharts.stockChart('container', {
-                series: [{
-                    type: 'line',
-                    name: document.title,
-                    data: parse_csv(result)
-                }],
-                title: {
-                    text: document.title,
-                    style: {fontSize: '24px'}
-                },
-                time: {useUTC: false},
-                stockTools: {
-                    gui: {enabled: false}
-                },
-                tooltip: {
-                    shape: 'square',
-                    headerShape: 'callout',
-                    borderWidth: 0,
-                    shadow: false
-                }
-            });
-        }
+    loadData('values.csv').then(function(result) {
+        plotGraph({
+            series: [{
+                type: 'line',
+                name: document.title,
+                data: parse_csv(result)
+            }]
+        });
     });
 </script>
 </body>
