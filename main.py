@@ -1,7 +1,11 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 import argparse
 from datetime import datetime
 
 from lib.helpers import DATE_FORMAT
+from lib.helpers import configure_logging
 from lib.downloader import downloader
 from lib.graphs import graphs_builder
 
@@ -14,14 +18,14 @@ def parse_args():
     download_parser.add_argument(
         '--engine',
         default='stock',
-        choices=['stock', 'currency'],
-        help='Доступные торговые системы: stock, currency https://iss.moex.com/iss/engines.xml',
+        choices=['stock', 'currency', 'nasdaq'],
+        help='Доступные торговые системы: "stock, currency, nasdaq" https://iss.moex.com/iss/engines.xml',
     )
     download_parser.add_argument(
         '--market',
         required=True,
-        choices=['shares', 'bonds', 'index', 'selt'],
-        help='Доступные рынки: index, shares, bonds, selt https://iss.moex.com/iss/engines/stock/markets.xml',
+        # choices=['shares', 'bonds', 'index', 'selt'],
+        help='Доступные рынки MOEX: "index, shares, bonds, selt" https://iss.moex.com/iss/engines/stock/markets.xml',
     )
     download_parser.add_argument(
         '--date',
@@ -72,5 +76,6 @@ def parse_args():
 
 
 if __name__ == "__main__":
+    configure_logging()
     args = parse_args()
     args.fn(args)

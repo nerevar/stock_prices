@@ -13,9 +13,8 @@ https://nerevar.github.io/moex_quotes/
   * [x] графики, визуализация
   * [x] расчёт индексов
   * [x] gh-pages
+  * [x] другие источники данных:
+    * [x] nasdaq
+    * [x] btc
   * [ ] индекс ВДО http://angrybonds.ru/
   * [ ] обновление графиков по крону
-  * [ ] другие источники данных:
-    * [ ] nasdaq
-    * [ ] oil
-    * [ ] btc
