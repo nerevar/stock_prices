@@ -14,6 +14,16 @@ MOEX_QUOTES_URL = 'https://iss.moex.com/iss/history/engines/{engine}/markets/{ma
                   '?limit=100&date={date}&start={start}'
 
 
+def get_filepath(engine, market, day):
+    return './quotes/{year}/{month}/{day}/{year}-{month}-{day}-{engine}-{market}.csv'.format(
+        year=day.strftime('%Y'),
+        month=day.strftime('%m'),
+        day=day.strftime('%d'),
+        engine=engine,
+        market=market
+    )
+
+
 def download_moex_data(engine, market, date, start=0, save_raw_xml=False):
     url = MOEX_QUOTES_URL.format(
         engine=engine,
@@ -35,13 +45,7 @@ def download_moex_data(engine, market, date, start=0, save_raw_xml=False):
 
 def save_to_csv(quotes, engine, market, date, header_attrs=None):
     date_parsed = datetime.strptime(date, DATE_FORMAT)
-    filepath = './quotes/{year}/{month}/{day}/{year}-{month}-{day}-{engine}-{market}.csv'.format(
-        year=date_parsed.strftime('%Y'),
-        month=date_parsed.strftime('%m'),
-        day=date_parsed.strftime('%d'),
-        engine=engine,
-        market=market
-    )
+    filepath = get_filepath(engine, market, date_parsed)
 
     os.makedirs(os.path.dirname(filepath), exist_ok=True)
 
@@ -125,25 +129,25 @@ def parse_moex_data(xml_data):
     return pagination, quote_attrs, quotes
 
 
-def get_moex_data(engine, market, date, start=0, save_raw_xml=False):
-    logging.info((engine, market, date))
+def get_moex_data(engine, market, date_str, start=0, save_raw_xml=False):
+    logging.info((engine, market, date_str))
 
-    xml_data = download_moex_data(engine, market, date, start, save_raw_xml)
+    xml_data = download_moex_data(engine, market, date_str, start, save_raw_xml)
     pagination, quote_attrs, quotes = parse_moex_data(xml_data)
 
     valid_quotes = [q for q in quotes if validate_quote(q, engine, market)]
 
     if len(valid_quotes):
-        save_to_csv(valid_quotes, engine, market, date, quote_attrs if start == 0 else None)
+        save_to_csv(valid_quotes, engine, market, date_str, quote_attrs if start == 0 else None)
     else:
         if len(quotes) == 0:
             logging.error('No quotes for "{}, {}, {}, {}", pagination: {}'.format(
-                engine, market, date, start, pagination))
+                engine, market, date_str, start, pagination))
 
     logging.debug('Got quotes: {:3d}/{:3d}, pagination: {}, params: {}, {}, {}, {}'.format(
         len(valid_quotes), len(quotes),
         '{} + {} < {}'.format(pagination['current_index'], pagination['page_size'], pagination['total_items']),
-        engine, market, date, start))
+        engine, market, date_str, start))
 
     if pagination['current_index'] + pagination['page_size'] < pagination['total_items']:
-        get_moex_data(engine, market, date, start + pagination['page_size'], save_raw_xml)
+        get_moex_data(engine, market, date_str, start + pagination['page_size'], save_raw_xml)

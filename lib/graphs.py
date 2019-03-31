@@ -7,6 +7,8 @@ import pandas as pd
 from collections import defaultdict
 
 from lib.helpers import daterange
+from lib.nasdaq_downloader import get_filepath as get_nasdaq_filepath
+from lib.moex_downloader import get_filepath as get_moex_filepath
 
 
 def load_graph_builder(name):
@@ -34,13 +36,11 @@ def load_graph_builders(graphs_list):
 
 
 def load_data(engine, market, day):
-    filepath = './quotes/{year}/{month}/{day}/{year}-{month}-{day}-{engine}-{market}.csv'.format(
-        year=day.strftime('%Y'),
-        month=day.strftime('%m'),
-        day=day.strftime('%d'),
-        engine=engine,
-        market=market
-    )
+    if engine == 'nasdaq':
+        filepath = get_nasdaq_filepath(market)
+    else:
+        filepath = get_moex_filepath(engine, market, day)
+
     if os.path.exists(filepath):
         return pd.read_csv(filepath)
     else:
@@ -60,13 +60,20 @@ def get_timestamp(day):
     return int(day.timestamp()) * 1000
 
 
-def calc_value(df, builder, day):
+def calc_daily_value(df, builder, day):
+    """Вычисляет точку графика `builder` за день `day` по данным из таблицы `df`
+    Возвращает [timestamp, значения графика]"""
     df_filtered = filter_data(df, builder.quote_filter())
     if df_filtered.shape[0] >= 1:
         value = builder.get_value(df_filtered)
         return merge_values(get_timestamp(day), value)
     else:
         return None
+
+
+def calc_batch_values(df, builder):
+    """Пересчитывает сразу весь график `builder` по данным из таблицы `df`"""
+    return builder.get_values(df)
 
 
 def save_values(name, values, clear=False):
@@ -81,22 +88,36 @@ def save_values(name, values, clear=False):
 
 def graphs_builder(args):
     graph_builders = load_graph_builders(args.graphs)
+    results = defaultdict(list)
 
     if args.dateend:
         dates = daterange(args.date, args.dateend)
     else:
         dates = [args.date]
 
-    results = defaultdict(list)
+    # days iterator for moex graphs
     for day in dates:
         for (engine, market), builders in graph_builders.items():
+            if engine not in ['stock', 'currency']:
+                continue
             data = load_data(engine, market, day)
             if data is None:
                 continue
             for builder in builders:
-                result = calc_value(data, builder['builder'], day)
+                result = calc_daily_value(data, builder['builder'], day)
                 if result is not None:
                     results[builder['name']].append(result)
+
+    # batch graph builder for nasdaq graphs
+    for (engine, market), builders in graph_builders.items():
+        if engine != 'nasdaq':
+            continue
+        data = load_data(engine, market, None)
+        if data is None:
+            continue
+        for builder in builders:
+            for value in calc_batch_values(data, builder['builder']):
+                results[builder['name']].append(value)
 
     for name, values in results.items():
         save_values(name, values, args.clear)
