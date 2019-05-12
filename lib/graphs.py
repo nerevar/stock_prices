@@ -122,4 +122,4 @@ def graphs_builder(args):
     for name, values in results.items():
         save_values(name, values, args.clear)
 
-    print(results)
+    print('got data for graphs: {}'.format(results.keys()))
