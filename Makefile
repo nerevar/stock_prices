@@ -20,6 +20,7 @@ travis-push:
 	git config --global user.email "travis@travis-ci.org"
 	git config --global user.name "Travis CI"
 
+	git status
 	git add quotes graph_data
 	git commit --message "Travis build for $(DAY): ${TRAVIS_BUILD_NUMBER}"
 
