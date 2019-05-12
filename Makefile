@@ -24,7 +24,6 @@ graphs_moex: download_moex
 	python main.py graphs --date $(DAY) --graphs eurrub moex tryrub usdrub yndx_moex
 
 download_nasdaq:
-	# TODO: add alphavantage key to travis variable
 	python main.py download --engine nasdaq --market INX --date $(DAY)
 	python main.py download --engine nasdaq --market BTC --date $(DAY)
 	python main.py download --engine nasdaq --market YNDX --date $(DAY)

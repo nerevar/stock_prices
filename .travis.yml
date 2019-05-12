@@ -14,6 +14,6 @@ install:
   - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy pandas requests
   - source activate test-environment
 script:
-  - make graphs_moex
+  - make cron
 after_success:
   - make travis-push

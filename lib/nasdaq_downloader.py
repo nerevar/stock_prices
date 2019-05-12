@@ -6,8 +6,8 @@ import requests
 
 from lib.helpers import read_last_line
 
-ALPHAVANTAGE_QUOTES_URL = 'https://www.alphavantage.co/query?function={function}&symbol={symbol}&apikey={key}' \
-                          '&datatype=csv&outputsize={size}'
+ALPHAVANTAGE_QUOTES_URL = 'https://www.alphavantage.co/query?function={function}&symbol={symbol}' \
+                          '&datatype=csv&outputsize={size}&apikey={key}'
 
 
 def get_filepath(symbol):
@@ -19,8 +19,17 @@ def is_data_exists(symbol):
 
 
 def get_alphavantage_key():
+    if 'ALPHAVANTAGE_KEY' in os.environ:
+        return os.environ.get('ALPHAVANTAGE_KEY')
+
     with open('./.alphavantage_key') as f:
         return f.read()
+
+
+def hide_apikey(url):
+    apikey_param = '&apikey='
+    apikey_index = url.find(apikey_param)
+    return url[:apikey_index + len(apikey_param)] + 'NNNNN'
 
 
 def download_alphavantage_data(symbol, size='compact'):
@@ -33,7 +42,7 @@ def download_alphavantage_data(symbol, size='compact'):
         size=size
     )
 
-    logging.debug('Request: {}'.format(url))
+    logging.debug('Request: {}'.format(hide_apikey(url)))
 
     r = requests.get(url)
 
