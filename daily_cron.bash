@@ -12,8 +12,8 @@ python main.py download --engine currency --market selt --date $DAY
 
 python main.py graphs --date $DAY --graphs eurrub moex tryrub usdrub yndx_moex
 
-python main.py download --engine nasdaq --market INX --date $DAY
-python main.py download --engine nasdaq --market BTC --date $DAY
-python main.py download --engine nasdaq --market YNDX --date $DAY
+# python main.py download --engine nasdaq --market INX --date $DAY
+# python main.py download --engine nasdaq --market BTC --date $DAY
+# python main.py download --engine nasdaq --market YNDX --date $DAY
 
-python main.py graphs --date $DAY --clear --graphs snp_inx btc yndx_nasdaq
+# python main.py graphs --date $DAY --clear --graphs snp_inx btc yndx_nasdaq

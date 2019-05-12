@@ -1,0 +1,2 @@
+language: bash
+script: bash daily_cron.bash 2019-05-10
