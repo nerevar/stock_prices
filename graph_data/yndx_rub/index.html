@@ -16,7 +16,7 @@
 <script src="../../static/js/highstock.js"></script>
 <script type="text/javascript">
     $
-        .when(loadData('values.csv'), loadData('../usdrub/values.csv'), loadData('../yndx_moex/values.csv'))
+        .when(loadData('../yndx_nasdaq/values.csv'), loadData('../usdrub/values.csv'), loadData('../yndx_moex/values.csv'))
         .then(function(result_yndx, result_usd, result_yndx_moex) {
             var data_yndx = parse_csv(result_yndx[0]);
             var data_usd = parse_csv(result_usd[0]);
