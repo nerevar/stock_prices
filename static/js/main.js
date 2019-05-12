@@ -1,16 +1,23 @@
 /**
  * Преобразует данные из csv в массив значений
+ * Для каждой строки (точки на графике) возвращает время и значение в этой точке (ровно одно значение)
  * @param {String} csv - строка с данными графика в формате: "timestamp,value1,<value2>,..."
- * @returns {Array} - массив [[timestamp, value1, <value2>, ...], ...]
+ * @param {Number} [valueIndex] - порядковый номер `Значения` в массиве значений.
+ *      По-умолчанию берётся первое. Нумерация с 1
+ * @returns {Array} - массив [[timestamp, value], ...]
  */
-function parse_csv(csv) {
+function parse_csv(csv, valueIndex) {
+    valueIndex || (valueIndex = 1);
     var series = [];
+
     csv.split('\n').forEach(function (line) {
         var data = line.split(',');
         if (data.length >= 2) {
             var point = [];
-            data.forEach(function(val) {
-                point.push(+val);
+            data.forEach(function(value, index) {
+                if (index === 0 || index === valueIndex) {
+                    point.push((value && value !== '\r') ? +value : null);
+                }
             });
             series.push(point);
         }
@@ -54,10 +61,6 @@ function plotGraph(params) {
     };
 
     Highcharts.stockChart('container', $.extend(true, {}, defaultParams, params));
-}
-
-function hasUndefined(a) {
-    return a.indexOf() !== -1;
 }
 
 /**

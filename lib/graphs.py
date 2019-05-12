@@ -2,6 +2,7 @@
 
 import os
 import csv
+import json
 import importlib
 import pandas as pd
 from collections import defaultdict
@@ -47,8 +48,15 @@ def load_data(engine, market, day):
         return None
 
 
-def filter_data(df, filters):
-    return df.loc[(df[list(filters)] == pd.Series(filters)).all(axis=1)]
+def build_filters_string(filters):
+    """Формирует строку для Pandas query, для фильтрации нужной ценной бумаги"""
+    parts = []
+    for key, value in filters.items():
+        if isinstance(value, (list, tuple)):
+            parts.append('({key} in {value})'.format(key=key, value=json.dumps(value, ensure_ascii=False)))
+        else:
+            parts.append('({key} == "{value}")'.format(key=key, value=value))
+    return ' and '.join(parts)
 
 
 def merge_values(date, value):
@@ -62,8 +70,10 @@ def get_timestamp(day):
 
 def calc_daily_value(df, builder, day):
     """Вычисляет точку графика `builder` за день `day` по данным из таблицы `df`
-    Возвращает [timestamp, значения графика]"""
-    df_filtered = filter_data(df, builder.quote_filter())
+    Возвращает [timestamp, значение графика[, значение 2 графика[, значение 3 графика]]]"""
+    filters_string = build_filters_string(builder.quote_filter())
+    df_filtered = df.query(filters_string)
+
     if df_filtered.shape[0] >= 1:
         value = builder.get_value(df_filtered)
         return merge_values(get_timestamp(day), value)
