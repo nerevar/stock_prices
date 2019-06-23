@@ -20,9 +20,10 @@ travis-push:
 	git config --global user.email "travis@travis-ci.org"
 	git config --global user.name "Travis CI"
 
+	git checkout master
 	git status
 	git add quotes graph_data
-	git commit quotes graph_data --message "Travis build for $(DAY): ${TRAVIS_BUILD_NUMBER}"
+	git commit quotes graph_data --message "Travis build #${TRAVIS_BUILD_NUMBER} for $(DAY)"
 
 	git remote add origin-with-token https://nerevar:${GITHUB_TOKEN}@github.com/nerevar/stock_prices.git
 	git push origin-with-token HEAD:master
