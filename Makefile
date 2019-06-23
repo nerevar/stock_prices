@@ -25,7 +25,7 @@ travis-push:
 	git commit quotes graph_data --message "Travis build for $(DAY): ${TRAVIS_BUILD_NUMBER}"
 
 	git remote add origin-with-token https://nerevar:${GITHUB_TOKEN}@github.com/nerevar/stock_prices.git
-	git push origin-with-token master
+	git push origin-with-token HEAD:master
 
 download_moex:
 	@echo "Download MOEX data for $(DAY)"
