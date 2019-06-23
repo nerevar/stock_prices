@@ -8,15 +8,15 @@ from lib.moex_downloader import get_moex_data
 
 
 def downloader(args):
-    if args.engine == 'nasdaq':
-        # для насдака скачиваем все котировки разом
-        get_nasdaq_data(args.engine, args.market)
-        return
-
     if args.dateend:
         dates = daterange(args.date, args.dateend)
     else:
         dates = [args.date]
+
+    if args.engine == 'nasdaq':
+        # для насдака скачиваем все котировки разом
+        get_nasdaq_data(args.engine, args.market, list(dates))
+        return
 
     for day in dates:
         if day.weekday() >= 5:

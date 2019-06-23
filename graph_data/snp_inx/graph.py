@@ -1,7 +1,9 @@
-from datetime import datetime
+# -*- coding: utf-8 -*-
+
+from lib.graphs import BaseGraph
 
 
-class GraphBuilder(object):
+class GraphBuilder(BaseGraph):
     date_field = 'timestamp'
     value_field = 'close'
 
@@ -12,7 +14,5 @@ class GraphBuilder(object):
         }
 
     def get_values(self, df):
-        df['date_field'] = df[self.date_field].apply(
-            lambda x: int(datetime.strptime(x, '%Y-%m-%d').timestamp()) * 1000
-        )
+        df['date_field'] = df[self.date_field].apply(BaseGraph.date_to_timestamp)
         return df[['date_field', self.value_field]].values.tolist()

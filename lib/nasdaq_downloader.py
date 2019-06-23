@@ -4,7 +4,7 @@ import os
 import logging
 import requests
 
-from lib.helpers import read_last_line
+from lib.helpers import read_last_line, DATE_FORMAT
 
 ALPHAVANTAGE_QUOTES_URL = 'https://www.alphavantage.co/query?function={function}&symbol={symbol}' \
                           '&datatype=csv&outputsize={size}&apikey={key}'
@@ -72,6 +72,12 @@ def filter_new_lines(symbol, lines):
     return [x for x in lines if x > last_line]
 
 
+def filter_dates(lines, dates):
+    start = dates[0].strftime(DATE_FORMAT)
+    end = dates[-1].strftime(DATE_FORMAT)
+    return [x for x in lines if start <= x[:10] <= end]
+
+
 def extract_csv(csv_data):
     lines = csv_data.split('\n')
     header = lines.pop(0)
@@ -79,7 +85,7 @@ def extract_csv(csv_data):
     return header, lines
 
 
-def get_nasdaq_data(engine, symbol):
+def get_nasdaq_data(engine, symbol, dates):
     is_file_exists = is_data_exists(symbol)
 
     logging.info((engine, symbol))
@@ -88,6 +94,9 @@ def get_nasdaq_data(engine, symbol):
     header, lines = extract_csv(csv_data)
 
     logging.info('Got: {} lines'.format(len(lines)))
+
+    # оставляем только строки за указанный диапазон дат
+    lines = filter_dates(lines, dates)
 
     if is_file_exists:
         new_lines = filter_new_lines(symbol, lines)

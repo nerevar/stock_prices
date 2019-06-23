@@ -3,13 +3,22 @@
 import os
 import csv
 import json
+import pytz
 import importlib
 import pandas as pd
+from datetime import datetime
 from collections import defaultdict
 
 from lib.helpers import daterange
 from lib.nasdaq_downloader import get_filepath as get_nasdaq_filepath
 from lib.moex_downloader import get_filepath as get_moex_filepath
+
+
+class BaseGraph(object):
+    @staticmethod
+    def date_to_timestamp(date):
+        dt = datetime.strptime(date, '%Y-%m-%d').replace(tzinfo=pytz.timezone('Europe/Moscow'))
+        return int(dt.timestamp()) * 1000
 
 
 def load_graph_builder(name):
