@@ -17,7 +17,11 @@ from lib.moex_downloader import get_filepath as get_moex_filepath
 class BaseGraph(object):
     @staticmethod
     def date_to_timestamp(date):
-        dt = datetime.strptime(date, '%Y-%m-%d').replace(tzinfo=pytz.timezone('Europe/Moscow'))
+        dt = datetime.strptime(date, '%Y-%m-%d') if type(date) == str else date
+
+        dt = dt \
+            .replace(tzinfo=pytz.UTC) \
+            .astimezone(pytz.timezone('Europe/Moscow'))
         return int(dt.timestamp()) * 1000
 
 
@@ -72,11 +76,6 @@ def merge_values(date, value):
     return [date] + (list(value) if isinstance(value, (list, tuple)) else [value])
 
 
-def get_timestamp(day):
-    # TODO: utc -> moscow time
-    return int(day.timestamp()) * 1000
-
-
 def calc_daily_value(df, builder, day):
     """Вычисляет точку графика `builder` за день `day` по данным из таблицы `df`
     Возвращает [timestamp, значение графика[, значение 2 графика[, значение 3 графика]]]"""
@@ -85,7 +84,7 @@ def calc_daily_value(df, builder, day):
 
     if df_filtered.shape[0] >= 1:
         value = builder.get_value(df_filtered)
-        return merge_values(get_timestamp(day), value)
+        return merge_values(BaseGraph.date_to_timestamp(day), value)
     else:
         return None
 
