@@ -1,0 +1,88 @@
+<!DOCTYPE HTML>
+<html lang="ru">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Индекс Мосбиржи и RTS</title>
+    <link rel="stylesheet" type="text/css" href="../../static/css/main.css">
+</head>
+<body>
+
+<div id="container" class="chart"></div>
+
+<script src="../../static/js/jquery-3.1.1.min.js"></script>
+<script src="../../static/js/main.js"></script>
+<script src="../../static/js/highstock.js"></script>
+<script type="text/javascript">
+    loadData('values.csv').then(function (result) {
+        plotGraph({
+            yAxis: [
+                {
+                    title: {
+                        // text: 'Полная дох'
+                    }
+                },
+                {
+                    title: {
+                        // text: 'SBMX'
+                    }
+                },
+                {
+                    title: {
+                        // text: 'MOEX'
+                    }
+                },
+                {
+                    title: {
+                        // text: 'USD'
+                    }
+                },
+            ],
+            series: [
+                {
+                    type: 'line',
+                    name: 'MCFTR',
+                    yAxis: 0,
+                    data: parse_csv(result, 0)
+                },
+                {
+                    type: 'line',
+                    name: 'SBMX',
+                    yAxis: 1,
+                    data: parse_csv(result, 1),
+                    visible: false
+                },
+                {
+                    type: 'line',
+                    name: 'iMOEX',
+                    yAxis: 0,
+                    data: parse_csv(result, 2)
+                },
+                {
+                    type: 'line',
+                    name: 'RTS',
+                    yAxis: 0,
+                    data: parse_csv(result, 3),
+                },
+                {
+                    type: 'line',
+                    name: 'USD',
+                    yAxis: 3,
+                    data: parse_csv(result, 4),
+                    visible: false
+                },
+            ],
+            legend: {
+                enabled: true
+            }
+        });
+    });
+</script>
+
+<ul>
+    <li>MCFTR — индекс полной доходности: как iMOEX, только с дивидендами, без налогов</li>
+    <li>iMOEX, RTS — индексы МосБиржи, только RTS в долларах</li>
+    <li>SBMX — БПИФ Сбербанка на индекс MCFTR, который торгуется на бирже</li>
+</ul>
+</body>
+</html>

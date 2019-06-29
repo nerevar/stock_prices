@@ -3,11 +3,11 @@
  * Для каждой строки (точки на графике) возвращает время и значение в этой точке (ровно одно значение)
  * @param {String} csv - строка с данными графика в формате: "timestamp,value1,<value2>,..."
  * @param {Number} [valueIndex] - порядковый номер `Значения` в массиве значений.
- *      По-умолчанию берётся первое. Нумерация с 1
+ *      По-умолчанию берётся первое. Нумерация с 0
  * @returns {Array} - массив [[timestamp, value], ...]
  */
 function parse_csv(csv, valueIndex) {
-    valueIndex || (valueIndex = 1);
+    valueIndex || (valueIndex = 0);
     var series = [];
 
     csv.split('\n').forEach(function (line) {
@@ -15,7 +15,7 @@ function parse_csv(csv, valueIndex) {
         if (data.length >= 2) {
             var point = [];
             data.forEach(function(value, index) {
-                if (index === 0 || index === valueIndex) {
+                if (index === 0 || index === (valueIndex+1)) {
                     point.push((value && value !== '\r') ? +value : null);
                 }
             });
