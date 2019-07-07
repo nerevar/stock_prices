@@ -1,0 +1,53 @@
+<!DOCTYPE HTML>
+<html lang="ru">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Индекс Мосбиржи с дивидендами: Брутто SBMX и Нетто FXRL</title>
+    <link rel="stylesheet" type="text/css" href="../../static/css/main.css">
+</head>
+<body>
+
+<div id="container" class="chart"></div>
+
+<script src="../../static/js/jquery-3.1.1.min.js"></script>
+<script src="../../static/js/main.js"></script>
+<script src="../../static/js/highstock.js"></script>
+<script type="text/javascript">
+    loadData('values.csv').then(function (result) {
+        plotGraph({
+            yAxis: [
+                {
+                    title: {
+                        // text: 'SBMX'
+                    }
+                },
+                {
+                    title: {
+                        // text: 'FXRL'
+                    }
+                },
+            ],
+            series: [
+                {
+                    type: 'line',
+                    name: 'SBMX',
+                    yAxis: 0,
+                    data: parse_csv(result, 0)
+                },
+                {
+                    type: 'line',
+                    name: 'FXRL',
+                    yAxis: 1,
+                    data: parse_csv(result, 1)
+                },
+            ],
+            legend: {
+                enabled: true
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

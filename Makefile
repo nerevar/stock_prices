@@ -37,7 +37,7 @@ download_moex:
 
 graphs_moex: download_moex
 	@echo "Buld graphs for MOEX for $(DAY)"
-	python main.py graphs --date $(DAY) --graphs eurrub imoex tryrub usdrub yndx_moex
+	python main.py graphs --date $(DAY) --graphs eurrub imoex tryrub usdrub yndx_moex sbmx_fxrl
 
 download_nasdaq:
 	@echo "Download NASDAQ data for $(DAY)"
